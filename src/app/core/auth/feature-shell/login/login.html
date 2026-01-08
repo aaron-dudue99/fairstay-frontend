@@ -1,0 +1,62 @@
+<div class="flex min-h-screen flex-col lg:flex-row">
+  <div class="flex flex-1 items-center justify-center p-4 sm:p-8">
+    <div class="w-full max-w-md space-y-6 sm:space-y-8">
+      <div class="text-center">
+        <img src="/images/logo.png" alt="FairStay Logo" width="100" class="mx-auto" />
+        <h1 class="text-2xl font-bold sm:text-3xl">Welcome Back</h1>
+        <p class="mt-2 text-sm text-muted-foreground sm:text-base">Login to access Fairstay</p>
+
+        <div
+          class="card mx-auto max-w-md rounded-lg overflow-hidden shadow-2xl shadow-primary/20 p-6 flex flex-col gap-4 items-center mt-4"
+        >
+          <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="flex flex-col gap-4 w-full">
+            <div class="p-field flex flex-col w-full">
+              <label for="email" class="mb-2 text-left w-full">Email</label>
+              <input
+                id="email"
+                type="email"
+                pInputText
+                formControlName="email"
+                placeholder="you@example.com"
+                class="w-full"
+              />
+            </div>
+            <div class="p-field flex flex-col w-full">
+              <label for="password" class="mb-2 text-left w-full">Password</label>
+              <p-password
+                [toggleMask]="true"
+                [feedback]="false"
+                inputId="passwordInput"
+                inputStyleClass="w-full"
+                formControlName="password"
+              />
+            </div>
+
+            <div class="p-field-checkbox flex items-center w-full">
+              <p-checkbox formControlName="rememberMe" binary="true"></p-checkbox>
+              <label for="rememberMe" class="ml-2">Remember me</label>
+            </div>
+
+            <button
+              pButton
+              type="submit"
+              class="w-full login-btn mt-2 flex justify-center items-center gap-2"
+              [disabled]="loading()"
+            >
+              @if (loading()) {
+              <i class="pi pi-spin pi-spinner"></i>
+              Logging in... } @else { Login }
+            </button>
+          </form>
+        </div>
+
+        <p class="text-sm mt-4">
+          Don’t have an account?
+          <a routerLink="/signup" class="text-primary hover:underline hover:cursor-pointer"
+            >Sign up</a
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
