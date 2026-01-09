@@ -1,24 +1,25 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { ApplicationConfig } from '@angular/core';
+import { routes } from './app.routes';
+import { authInterceptor } from './core/auth/data-access/auth.interceptor';
+import { authInitializer } from './core/auth/data-access/auth.initializer';
+import { provideAppInitializer } from '@angular/core';
+import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
-import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { MessageService } from 'primeng/api';
-import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor';
+import { provideRouter } from '@angular/router';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptors,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideClientHydration(withEventReplay()),
-    providePrimeNG({
-      theme: {
-        preset: Aura,
-      },
-      ripple: true,
-    }),
-    // provideHttpClient(withInterceptors([httpErrorInterceptor])),
+    provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
+    provideAppInitializer(authInitializer),
+    providePrimeNG({ theme: { preset: Aura }, ripple: true }),
     MessageService,
   ],
 };

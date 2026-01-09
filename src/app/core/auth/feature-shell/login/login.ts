@@ -51,13 +51,12 @@ export class Login {
 
     this.loading.set(true);
 
-    const { email, password, rememberMe } = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
     this.authService
       .login(email!, password!)
       .pipe(take(1))
       .subscribe({
         next: (response) => {
-          authState.setUser(response.data.user);
           this.messageService.add({
             severity: 'success',
             summary: 'Login successful',

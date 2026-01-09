@@ -45,7 +45,6 @@ export class HttpService {
       .pipe(catchError(this.handleError));
   }
   private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('An error occurred:', error);
     return throwError(() => new Error('Something bad happened; please try again later.'));
   }
 }

@@ -11,7 +11,6 @@ import { MessageService } from 'primeng/api';
 import { passwordMatchValidator } from '../../../../utils/password-match.validator';
 import { take } from 'rxjs/internal/operators/take';
 import { authState } from '../../data-access/auth.state';
-import { subscribe } from 'diagnostics_channel';
 import { RegisterUserForm } from '../../data-access/auth.models';
 @Component({
   selector: 'app-signup',

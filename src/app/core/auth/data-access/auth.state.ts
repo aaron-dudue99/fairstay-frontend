@@ -1,21 +1,22 @@
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { User } from './auth.models';
 
-class AuthState {
-  private _user = signal<User | null>(null);
-  user = this._user.asReadonly();
+const user = signal<User | null>(null);
+const initialized = signal<boolean>(false);
+const token = signal<string | null>(null);
 
-  setUser(user: User | null) {
-    this._user.set(user);
-  }
+export const authState = {
+  user,
+  token,
+  initialized,
 
-  clearUser() {
-    this._user.set(null);
-  }
+  isAuthenticated: computed(() => !!user()),
+  setUser: (u: User) => user.set(u),
+  setToken: (t: string) => token.set(t),
+  clear: () => {
+    user.set(null);
+    token.set(null);
+  },
 
-  isAuthenticated() {
-    return this._user() !== null;
-  }
-}
-
-export const authState = new AuthState();
+  markInitialized: () => initialized.set(true),
+};
