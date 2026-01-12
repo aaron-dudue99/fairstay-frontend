@@ -1,0 +1,12 @@
+<nav class="flex flex-col gap-2">
+  @for (navItem of navItems; track navItem.name){
+  <div
+    class="w-full bg-transparent py-2 hover:bg-primary rounded-md transition-colors duration-300 hover:cursor-pointer"
+  >
+    <a [routerLink]="navItem.route" class="flex items-center gap-2 px-2">
+      <i class="{{ navItem.icon }}"></i>
+      <span>{{ navItem.name }}</span>
+    </a>
+  </div>
+  }
+</nav>

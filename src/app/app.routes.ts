@@ -18,6 +18,29 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./core/layout/main-layout/main-layout').then((m) => m.MainLayout),
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./libs/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'properties',
+        loadComponent: () => import('./libs/properties/properties').then((m) => m.Properties),
+      },
+      {
+        path: 'leases',
+        loadComponent: () => import('./libs/leases/leases').then((m) => m.Leases),
+      },
+      {
+        path: 'payments',
+        loadComponent: () => import('./libs/payments/payments').then((m) => m.Payments),
+      },
+    ],
   },
 
   // {
