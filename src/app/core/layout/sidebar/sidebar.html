@@ -1,12 +1,31 @@
-<nav class="flex flex-col gap-2">
+<nav class="flex flex-col gap-4 mt-8">
   @for (navItem of navItems; track navItem.name){
   <div
-    class="w-full bg-transparent py-2 hover:bg-primary rounded-md transition-colors duration-300 hover:cursor-pointer"
-  >
-    <a [routerLink]="navItem.route" class="flex items-center gap-2 px-2">
-      <i class="{{ navItem.icon }} text-yellow-500"></i>
-      <span>{{ navItem.name }}</span>
-    </a>
+    class="w-full py-3 px-4 rounded-xl transition-all duration-200 hover:cursor-pointer group flex items-center gap-3 text-gray-400 hover:text-white hover:bg-white/5"
+    [routerLink]="navItem.route"
+    routerLinkActive="bg-primary text-primary-contrast font-bold shadow-lg shadow-primary/20"
+    [routerLinkActiveOptions]="{ exact: true }">
+    <i [class]="navItem.icon" class="text-xl"></i>
+    <span class="text-sm font-medium">{{ navItem.name }}</span>
   </div>
   }
 </nav>
+
+<div class="mt-auto pt-6 border-t border-white/10">
+  <div class="flex items-center gap-3 mb-4 hover:bg-white/5 p-2 rounded-xl cursor-pointer transition-colors">
+    <div class="w-10 h-10 rounded-full bg-gray-600 overflow-hidden flex-shrink-0">
+      <img src="https://primefaces.org/cdn/primeng/images/demo/avatar/asiyajavayant.png"
+        class="w-full h-full object-cover">
+    </div>
+    <div class="flex flex-col">
+      <span class="text-sm font-bold text-white">Felipe Almeida</span>
+      <span class="text-xs text-gray-400">felipe@fairstay.com</span>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3 px-2 py-2 text-gray-400 hover:text-red-400 cursor-pointer transition-colors"
+    (click)="onLogout()">
+    <i class="pi pi-sign-out"></i>
+    <span class="text-sm font-medium">Sign out</span>
+  </div>
+</div>

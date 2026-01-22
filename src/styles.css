@@ -3,29 +3,54 @@
 @import 'primeicons/primeicons.css';
 
 :root {
-  --primary-color: #0d9488;
-  --primary-color-text: #f8fafc;
-  --highlight-bg: #fde68a;
-  --highlight-text-color: #1e293b;
-  --green-500: #22c55e;
-  --yellow-500: #f59e0b;
+  --primary-color: #10b981;
+  --primary-color-text: #ffffff;
+  --secondary-color: #64748b;
+
+  --surface-ground: #0f172a;
+
+  --surface-section: rgba(10, 28, 22, 0.7);
+  --surface-card: rgba(14, 34, 28, 0.6);
+  --surface-hover: rgba(16, 185, 129, 0.08);
+
+  --text-color: #f8fafc;
+  --text-color-secondary: #94a3b8;
+  --text-color-tertiary: #64748b;
+
+  --surface-border: rgba(255, 255, 255, 0.08);
+
+  --green-500: #10b981;
+  --blue-500: #3b82f6;
+  --yellow-500: #eab308;
+  --purple-500: #a855f7;
   --red-500: #ef4444;
-  --surface-ground: #f8fafc;
-  --surface-section: #f8fafc;
-  --surface-card: #ffffff;
-  --surface-border: #e5e7eb;
-  --text-color: #1e293b;
-  --text-color-secondary: #475569;
-  --border-radius: 12px;
+
+  --border-radius: 16px;
 }
 
 :root.dark {
-  --surface-ground: #020617;
-  --surface-card: #020617;
-  --surface-border: #1e293b;
+  --surface-ground: #0f172a;
+  --surface-section: rgba(15, 23, 42, 0.7);
+  --surface-card: rgba(17, 24, 39, 0.6);
+  --surface-border: rgba(255, 255, 255, 0.08);
   --text-color: #f8fafc;
-  --text-color-secondary: #cbd5e1;
+  --text-color-secondary: #94a3b8;
 }
+
+.glass {
+  background: var(--surface-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--surface-border);
+}
+
+.glass-panel {
+  background: var(--surface-section);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid var(--surface-border);
+}
+
 body {
   font-family: 'Manrope', sans-serif;
 }
@@ -36,4 +61,8 @@ h3,
 h4 {
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
+}
+
+button {
+  cursor: pointer;
 }

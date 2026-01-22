@@ -15,6 +15,11 @@ export const routes: Routes = [
     loadComponent: () => import('./core/auth/feature-shell/login/login').then((m) => m.Login),
   },
   {
+    path: 'forgot-password',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./core/auth/feature-shell/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./core/layout/main-layout/main-layout').then((m) => m.MainLayout),

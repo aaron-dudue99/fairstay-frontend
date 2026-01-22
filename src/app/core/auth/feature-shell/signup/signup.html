@@ -1,110 +1,93 @@
-<div class="flex min-h-screen flex-col lg:flex-row">
-  <div class="flex flex-1 items-center justify-center p-4 sm:p-8">
-    <div class="w-full max-w-3xl space-y-6 sm:space-y-8">
-      <div class="text-center">
-        <img src="/images/logo.png" alt="FairStay Logo" width="100" class="mx-auto" />
-        <h1 class="text-2xl font-bold sm:text-3xl">Welcome to Fairstay</h1>
-        <p class="mt-2 text-sm text-muted-foreground sm:text-base">Please signup to continue</p>
-        <div
-          class="card mx-auto max-w-3xl rounded-lg overflow-hidden shadow-2xl shadow-primary/20 p-6 flex flex-col gap-4 items-center mt-4"
-        >
-          <form
-            class="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full"
-            [formGroup]="signupForm"
-            (ngSubmit)="onSignUp()"
-          >
-            <div class="p-field flex flex-col w-full">
-              <label for="fullName" class="mb-2 text-left w-full">Full Name</label>
-              <input
-                id="fullName"
-                type="text"
-                pInputText
-                formControlName="fullName"
-                placeholder="John Doe"
-                class="w-full"
-              />
-            </div>
-            <div class="p-field flex flex-col w-full">
-              <label for="phoneNumber" class="mb-2 text-left w-full">Phone Number</label>
-              <input
-                id="phoneNumber"
-                type="text"
-                pInputText
-                formControlName="phoneNumber"
-                placeholder="0712345678"
-                class="w-full"
-              />
-            </div>
-            <div class="p-field flex flex-col w-full">
-              <label for="email" class="mb-2 text-left w-full">Email Address</label>
-              <input
-                id="email"
-                type="email"
-                pInputText
-                formControlName="email"
-                placeholder="you@example.com"
-                class="w-full"
-              />
-            </div>
-            <div class="p-field flex flex-col w-full">
-              <label for="role" class="mb-2 text-left w-full">Role</label>
-              <p-select
-                [options]="roles"
-                [checkmark]="true"
-                optionLabel="label"
-                [showClear]="true"
-                optionValue="value"
-                placeholder="Select your Role"
-                class="w-full"
-                formControlName="role"
-              />
-            </div>
+<div class="flex min-h-screen items-center justify-center p-4 bg-surface-ground relative overflow-hidden">
 
-            <div class="p-field flex flex-col w-full">
-              <label for="password" class="mb-2 text-left w-full">Password</label>
-              <p-password
-                [toggleMask]="true"
-                inputId="passwordInput"
-                inputStyleClass="w-full"
-                formControlName="password"
-              />
-            </div>
-            <div class="p-field flex flex-col w-full">
-              <label for="confirmPassword" class="mb-2 text-left w-full">Confirm Password</label>
-              <p-password
-                [toggleMask]="true"
-                [feedback]="false"
-                inputId="confirmPasswordInput"
-                inputStyleClass="w-full"
-                formControlName="confirmPassword"
-              />
-              @if ( signupForm.errors?.['passwordMismatch'] &&
-              signupForm.get('confirmPassword')?.touched ) {
-              <small class="text-red-500 mt-1"> Passwords do not match </small>
-              }
-            </div>
+  <!-- Background Blur Elements -->
+  <div
+    class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] pointer-events-none">
+  </div>
+  <div
+    class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none">
+  </div>
 
-            <div></div>
-            <button
-              pButton
-              [type]="'submit'"
-              class="w-full login-btn mt-2 flex justify-center items-center gap-2"
-              [disabled]="loading()"
-            >
-              @if (loading()) {
-              <i class="pi pi-spin pi-spinner"></i>
-              Signing Up... } @else { Sign Up }
-            </button>
-          </form>
-        </div>
+  <!-- Content -->
+  <div class="glass p-8 rounded-3xl w-full max-w-3xl relative z-10 flex flex-col items-center">
 
-        <p class="text-sm mt-4">
-          Already have an account?
-          <a routerLink="/login" class="text-primary hover:underline hover:cursor-pointer"
-            >Log in</a
-          >
-        </p>
+    <!-- Logo -->
+    <div class="mb-4">
+      <img src="images/logo.png" alt="FairStay Logo" class="w-16 h-16 object-contain" />
+    </div>
+
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-white mb-2">Create an Account</h1>
+      <p class="text-gray-400 text-sm">Join FairStay to manage your rentals efficiently</p>
+    </div>
+
+    <!-- Form -->
+    <form class="grid grid-cols-1 lg:grid-cols-2 gap-5 w-full" [formGroup]="signupForm" (ngSubmit)="onSignUp()">
+      <div class="flex flex-col gap-2">
+        <label for="fullName" class="text-sm font-medium text-gray-300">Full Name</label>
+        <input id="fullName" type="text" pInputText formControlName="fullName" placeholder="John Doe"
+          class="w-full bg-surface-card border-surface-border text-white placeholder:text-gray-500 rounded-xl py-3 px-4 focus:border-primary focus:ring-0" />
       </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="phoneNumber" class="text-sm font-medium text-gray-300">Phone Number</label>
+        <input id="phoneNumber" type="text" pInputText formControlName="phoneNumber" placeholder="0712345678"
+          class="w-full bg-surface-card border-surface-border text-white placeholder:text-gray-500 rounded-xl py-3 px-4 focus:border-primary focus:ring-0" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="email" class="text-sm font-medium text-gray-300">Email Address</label>
+        <input id="email" type="email" pInputText formControlName="email" placeholder="you@example.com"
+          class="w-full bg-surface-card border-surface-border text-white placeholder:text-gray-500 rounded-xl py-3 px-4 focus:border-primary focus:ring-0" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="role" class="text-sm font-medium text-gray-300">Role</label>
+        <p-select [options]="roles" [checkmark]="true" optionLabel="label" [showClear]="true" optionValue="value"
+          placeholder="Select your Role" styleClass="w-full bg-surface-card border-surface-border rounded-xl"
+          formControlName="role" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="password" class="text-sm font-medium text-gray-300">Password</label>
+        <p-password [toggleMask]="true" inputId="passwordInput" styleClass="w-full"
+          inputStyleClass="w-full bg-surface-card border-surface-border text-white placeholder:text-gray-500 rounded-xl py-3 px-4 focus:border-primary focus:ring-0"
+          formControlName="password" placeholder="Create password" />
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="confirmPassword" class="text-sm font-medium text-gray-300">Confirm Password</label>
+        <p-password [toggleMask]="true" [feedback]="false" inputId="confirmPasswordInput" styleClass="w-full"
+          inputStyleClass="w-full bg-surface-card border-surface-border text-white placeholder:text-gray-500 rounded-xl py-3 px-4 focus:border-primary focus:ring-0"
+          formControlName="confirmPassword" placeholder="Confirm password" />
+        @if ( signupForm.errors?.['passwordMismatch'] &&
+        signupForm.get('confirmPassword')?.touched ) {
+        <small class="text-red-400 mt-1"> Passwords do not match </small>
+        }
+      </div>
+
+      <div class="lg:col-span-2 mt-4">
+        <button pButton [type]="'submit'"
+          class="w-full py-3 rounded-xl bg-primary text-primary-contrast font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
+          [disabled]="loading()">
+          @if (loading()) {
+          <i class="pi pi-spin pi-spinner"></i>
+          <span>Signing Up...</span>
+          } @else {
+          <span>Create Account</span>
+          }
+        </button>
+      </div>
+    </form>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center">
+      <p class="text-sm text-gray-500">
+        Already have an account?
+        <a routerLink="/login" class="text-primary font-bold hover:text-primary/80 transition-colors cursor-pointer">Log
+          in</a>
+      </p>
     </div>
   </div>
 </div>

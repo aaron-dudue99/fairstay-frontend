@@ -1,16 +1,20 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../auth/data-access/auth-service';
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidebar.html',
 })
 export class Sidebar {
+  readonly authService = inject(AuthService);
+  readonly router = inject(Router);
+
   navItems = [
     {
       name: 'Dashboard',
-      icon: 'pi pi-objects-column',
+      icon: 'pi pi-th-large',
       route: '/dashboard',
     },
     {
@@ -20,13 +24,26 @@ export class Sidebar {
     },
     {
       name: 'Leases',
-      icon: 'pi pi-file-check',
+      icon: 'pi pi-file-edit',
       route: '/leases',
     },
     {
       name: 'Payments',
-      icon: 'pi pi-credit-card',
+      icon: 'pi pi-wallet',
       route: '/payments',
     },
+    {
+      name: 'Reports',
+      icon: 'pi pi-chart-bar',
+      route: '/reports',
+    },
   ];
+
+  onLogout() {
+    this.authService
+      .logout()
+      .subscribe(() => {
+        this.router.navigate(['/login']);
+      });
+  }
 }

@@ -1,22 +1,24 @@
-<div class="flex h-screen overflow-hidden">
+<div class="flex h-screen w-full bg-surface-ground overflow-hidden relative">
   <div
-    class="card overflow-hidden h-screen w-64 rounded-xl shadow-lg shadow-yellow-500/20 p-6 flex flex-col"
-  >
-    <div class="border-b border-yellow-500/50">
-      <div class="flex pb-4 items-center gap-2">
-        <img src="images/logo.png" alt="" class="w-8" />
-        <h4>FairStay</h4>
+    class="absolute top-0 left-0 w-full h-[50vh] bg-green-500/10 rounded-full blur-[120px] pointer-events-none transform -translate-y-1/2"
+  ></div>
+
+  <div class="w-60 glass-panel p-6 flex flex-col flex-shrink-0 z-20 rounded-xl shadow-lg">
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-10 h-10 flex items-center justify-center">
+        <img src="images/logo.png" alt="FairStay Logo" class="w-full h-full object-contain" />
+      </div>
+      <div>
+        <h4 class="font-bold text-xl text-white tracking-tight">FairStay</h4>
+        <p class="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Rental Manager</p>
       </div>
     </div>
 
-    <div class="mt-10">
-      <app-sidebar></app-sidebar>
-    </div>
+    <app-sidebar class="flex flex-col flex-1 min-h-0"></app-sidebar>
   </div>
-  <div class="flex-1 p-6 overflow-auto">
-    <div class="h-12 border-b border-yellow-500/50">
-      <app-topbar></app-topbar>
-    </div>
+
+  <!-- Main Content -->
+  <div class="flex-1 overflow-auto bg-transparent relative z-10">
     <router-outlet></router-outlet>
   </div>
 </div>
