@@ -1,59 +1,118 @@
-# FairstayFrontend
+# FairStay
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.3.
+**Clear, fair rental records for landlords and tenants.**
 
-## Development server
+FairStay is a lightweight rental record management system designed for informal and semi-formal housing markets where agreements and rent payments are often undocumented.  
+It helps landlords and tenants maintain a **shared, neutral record** of agreements and payments to reduce misunderstandings and disputes.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## 🌍 Problem
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+In many rental markets:
 
-## Code scaffolding
+- Agreements are verbal or informal
+- Rent payments lack consistent receipts
+- Disputes arise due to missing or conflicting records
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+FairStay does **not enforce** agreements.  
+It simply provides a **clear, time-stamped history** that both parties can rely on.
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## ✨ What FairStay Does
 
-```bash
-ng generate --help
-```
+- Phone-based authentication (OTP)
+- Digital rental agreements (non-legal)
+- Immutable rent payment records
+- Receipt generation
+- Role-based access (Landlord / Tenant)
+- Clear audit timelines
 
-## Building
+> FairStay records facts — it does not judge or enforce.
 
-To build the project run:
+---
 
-```bash
-ng build
-```
+## 🧱 Monorepo Structure
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+This repository uses a **monorepo** approach to keep the full product in one place.
+fairstay/
+├── backend/ # Spring Boot API
+├── frontend/ # Angular application
+├── docs/ # Branding, diagrams, screenshots
+└── README.md
 
-## Running unit tests
+---
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## 🛠️ Tech Stack
 
-```bash
-ng test
-```
+### Backend
 
-## Running end-to-end tests
+- Java 21+
+- Spring Boot
+- Spring Security (JWT)
+- PostgreSQL
+- Flyway (DB migrations)
 
-For end-to-end (e2e) testing, run:
+### Frontend
 
-```bash
-ng e2e
-```
+- Angular
+- TypeScript
+- Tailwind CSS
+- Angular Reactive Forms
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+---
 
-## Additional Resources
+## 🧠 Architecture Highlights
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Feature-based package structure
+- Strong domain modeling (Lease, Payment, Agreement)
+- Append-only payment records (no edits or deletes)
+- Ownership-based authorization
+- Agreement acceptance workflow
+- Multi-currency support without auto-conversion
+
+---
+
+## 🔐 Disclaimer
+
+FairStay is a **record-keeping system only**.  
+It does **not** provide legal enforcement, arbitration, or financial guarantees.
+
+---
+
+## 🚧 Project Status
+
+This project is currently under active development, will update this section when it's complete
+
+Some integrations (SMS, mobile money) are intentionally mocked or simulated.
+
+---
+
+## 📸 Screens & Branding
+
+Branding and UI mockups are available in the `/docs` directory.
+
+---
+
+## 🗺️ Roadmap (High Level)
+
+- [ ] Core backend domain & APIs
+- [ ] Angular role-based UI
+- [ ] Receipt PDF generation
+- [ ] Dispute workflow
+- [ ] Offline/PWA support
+- [ ] Payment provider integrations (future)
+
+---
+
+## 👤 Author
+
+Built by **Duduzile Sibanda**  
+Full-stack developer focused on building practical, trust-aware systems.
+
+---
+
+## 📄 License
+
+This project is for educational and demonstration purposes.

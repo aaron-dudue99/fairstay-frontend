@@ -17,7 +17,10 @@ export const routes: Routes = [
   {
     path: 'forgot-password',
     canActivate: [guestGuard],
-    loadComponent: () => import('./core/auth/feature-shell/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+    loadComponent: () =>
+      import('./core/auth/feature-shell/forgot-password/forgot-password').then(
+        (m) => m.ForgotPassword,
+      ),
   },
   {
     path: '',
@@ -31,7 +34,8 @@ export const routes: Routes = [
       },
       {
         path: 'dashboard',
-        loadComponent: () => import('./libs/dashboard/dashboard').then((m) => m.Dashboard),
+        loadComponent: () =>
+          import('./libs/dashboard/feature-shell/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'properties',
