@@ -1,126 +1,211 @@
 import { inject } from '@angular/core';
-import { LeaseDetails, LeaseStatus, LeaseSummary } from './leases.models';
-import {
-  patchState,
-  signalStore,
-  withComputed,
-  withMethods,
-  withMethods,
-  withState,
-} from '@ngrx/signals';
+import { LeaseDetails, LeaseRequest } from './leases.models';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { LeasesApi } from './leases.api';
-
+import { switchMap } from 'rxjs';
 export interface LeasesState {
-  entities: Record<string, LeaseSummary>;
-  ids: string[];
+  entities: Record<string, LeaseDetails>;
+  currentLeaseId: string | null;
 
-  selectedLeaseId: string | null;
+  status: 'idle' | 'loading' | 'success' | 'error';
+  error: string | null;
 
-  details: Record<string, LeaseDetails>;
-
-  loading: {
-    list: boolean;
-    details: boolean;
-    action: boolean;
+  workflow: {
+    accepting: boolean;
+    terminating: boolean;
+    creating: boolean;
+    fetching: boolean;
   };
-
-  error: {
-    list?: string | null;
-    details?: string | null;
-    action?: string | null;
-  };
-
-  filters: {
-    status?: LeaseStatus;
-    role?: 'LANDLORD' | 'TENANT';
-  };
-
-  lastUpdated: any;
 }
-
-const initialState: LeasesState = {
-  entities: {},
-  ids: [],
-  selectedLeaseId: null,
-  details: {},
-
-  loading: {
-    list: false,
-    details: false,
-    action: false,
-  },
-
-  error: {},
-
-  filters: {},
-  lastUpdated: null,
-};
 
 export const LeasesStore = signalStore(
   { providedIn: 'root' },
-  withState(initialState),
-
-  withComputed((store) => {
-    return {
-      leaseList: () => store.ids().map((id) => store.entities()[id]),
-
-      selectedLease: () => {
-        const selectedLeaseId = store.selectedLeaseId();
-        return selectedLeaseId ? store.details()[selectedLeaseId] : null;
-      },
-
-      filteredLeases: () => {
-        const status = store.filters().status;
-
-        if (!status) return store.ids().map((id) => store.entities()[id]);
-        return store
-          .ids()
-          .map((id) => store.entities()[id])
-          .filter((lease) => lease.status === status);
-      },
-    };
+  withState<LeasesState>({
+    entities: {},
+    currentLeaseId: null,
+    status: 'idle',
+    error: null,
+    workflow: {
+      accepting: false,
+      terminating: false,
+      creating: false,
+      fetching: false,
+    },
   }),
+  withComputed((store) => ({
+    currentLease: () => {
+      const id = store.currentLeaseId();
+      return id ? store.entities()[id] : null;
+    },
 
+    isbusy: () =>
+      store.workflow().accepting || store.workflow().terminating || store.workflow().creating,
+  })),
   withMethods((store) => {
     const api = inject(LeasesApi);
-    const auth = inject(AuthStore);
+
     return {
-      selectLease(id: string) {
-        patchState(store, { selectedLeaseId: id });
-      },
-      clearSelection() {
-        patchState(store, { selectedLeaseId: null });
-      },
-
-      async loadLeases() {
-        patchState(store, {
-          loading: { ...store.loading(), list: true },
-          error: { ...store.error(), list: null },
-        });
-
-        try {
-          const leases = await api.getLeases();
-
-          const entities: Record<string, LeaseSummary> = {};
-          const ids: string[] = [];
-
-          for (const lease of leases) {
-            entities[lease.id] = lease;
-            ids.push(lease.id);
-          }
-
+      loadLeaseById: rxMethod<string>(
+        switchMap((leaseId) => {
           patchState(store, {
-            entities,
-            ids,
-            loading: { ...store.loading(), list: false },
+            status: 'loading',
+            error: null,
+            workflow: { ...store.workflow(), fetching: true },
           });
-        } catch (error: any) {
+
+          return api
+            .getLeaseById(leaseId)
+            .then(
+              (lease) => {
+                patchState(store, (state) => ({
+                  entities: { ...state.entities, [lease.lease.id]: lease },
+                  currentLeaseId: lease.lease.id,
+                  status: 'success' as const,
+                }));
+              },
+              (error) => {
+                patchState(store, {
+                  status: 'error',
+                  error: error?.message || 'Failed to load lease',
+                  workflow: { ...store.workflow(), fetching: false },
+                });
+              },
+            )
+            .finally(() => {
+              patchState(store, {
+                status: 'idle',
+                workflow: { ...store.workflow(), fetching: false },
+              });
+            });
+        }),
+      ),
+
+      acceptAsTenant: rxMethod<string>(
+        switchMap((leaseId) => {
           patchState(store, {
-            loading: { ...store.loading(), list: false },
-            error: { ...store.error(), list: error.message },
+            status: 'loading',
+            error: null,
+            workflow: { ...store.workflow(), accepting: true },
           });
-        }
-      },
+          return api
+            .acceptAsTenant(leaseId)
+            .then(
+              (lease) => {
+                patchState(store, (state) => ({
+                  entities: { ...state.entities, [lease.lease.id]: lease },
+                }));
+              },
+              (error) => {
+                patchState(store, {
+                  status: 'error',
+                  error: error?.message || 'Failed to accept lease',
+                  workflow: { ...store.workflow(), accepting: false },
+                });
+              },
+            )
+            .finally(() => {
+              patchState(store, {
+                status: 'idle',
+                workflow: { ...store.workflow(), accepting: false },
+              });
+            });
+        }),
+      ),
+
+      acceptAsLandlord: rxMethod<string>(
+        switchMap((leaseId) => {
+          patchState(store, {
+            status: 'loading',
+            error: null,
+            workflow: { ...store.workflow(), accepting: true },
+          });
+
+          return api
+            .acceptAsLandlord(leaseId)
+            .then(
+              (lease) => {
+                patchState(store, (state) => ({
+                  entities: { ...state.entities, [lease.lease.id]: lease },
+                }));
+              },
+              (error) => {
+                patchState(store, {
+                  status: 'error',
+                  error: error?.message || 'Failed to accept lease',
+                });
+              },
+            )
+            .finally(() => {
+              patchState(store, {
+                status: 'idle',
+                workflow: { ...store.workflow(), accepting: false },
+              });
+            });
+        }),
+      ),
+
+      createLease: rxMethod<LeaseRequest>(
+        switchMap((leaseRequest) => {
+          patchState(store, {
+            status: 'loading',
+            error: null,
+            workflow: { ...store.workflow(), creating: true },
+          });
+
+          return api
+            .createLease(leaseRequest)
+            .then(
+              (lease) => {
+                patchState(store, (state) => ({
+                  entities: { ...state.entities, [lease.lease.id]: lease },
+                  currentLeaseId: lease.lease.id,
+                  workflow: { ...state.workflow, creating: false },
+                }));
+              },
+              (error) => {
+                patchState(store, {
+                  status: 'error',
+                  error: error?.message || 'Failed to create lease',
+                  workflow: { ...store.workflow(), creating: false },
+                });
+              },
+            )
+            .finally(() => {
+              patchState(store, {
+                status: 'idle',
+                workflow: { ...store.workflow(), creating: false },
+              });
+            });
+        }),
+      ),
+
+      terminateLease: rxMethod<string>(
+        switchMap((leaseId) => {
+          patchState(store, { workflow: { ...store.workflow(), terminating: true } });
+          return api
+            .terminateLease(leaseId)
+            .then(
+              (lease) => {
+                patchState(store, (state) => ({
+                  entities: { ...state.entities, [lease.lease.id]: lease },
+                }));
+              },
+              (error) => {
+                patchState(store, {
+                  status: 'error',
+                  error: error?.message || 'Failed to terminate lease',
+                  workflow: { ...store.workflow(), terminating: false },
+                });
+              },
+            )
+            .finally(() => {
+              patchState(store, {
+                workflow: { ...store.workflow(), terminating: false },
+              });
+            });
+        }),
+      ),
     };
   }),
 );
