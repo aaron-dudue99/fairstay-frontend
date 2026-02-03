@@ -1,14 +1,17 @@
 import { inject } from '@angular/core';
-import { LeaseDetails, LeaseRequest } from './leases.models';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { signalStore, withComputed, withMethods, withState, patchState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { LeasesApi } from './leases.api';
 import { switchMap } from 'rxjs';
+import { LeasesApi } from './leases.api';
+import { LeaseDetails, LeaseRequest } from './leases.models';
+
+export type LeaseStatusState = 'idle' | 'loading' | 'success' | 'error';
+
 export interface LeasesState {
   entities: Record<string, LeaseDetails>;
   currentLeaseId: string | null;
 
-  status: 'idle' | 'loading' | 'success' | 'error';
+  status: LeaseStatusState;
   error: string | null;
 
   workflow: {
@@ -19,12 +22,18 @@ export interface LeasesState {
   };
 }
 
+const IDLE = 'idle' as const;
+const LOADING = 'loading' as const;
+const SUCCESS = 'success' as const;
+const ERROR = 'error' as const;
+
 export const LeasesStore = signalStore(
   { providedIn: 'root' },
+
   withState<LeasesState>({
     entities: {},
     currentLeaseId: null,
-    status: 'idle',
+    status: IDLE,
     error: null,
     workflow: {
       accepting: false,
@@ -33,50 +42,67 @@ export const LeasesStore = signalStore(
       fetching: false,
     },
   }),
+
   withComputed((store) => ({
     currentLease: () => {
       const id = store.currentLeaseId();
-      return id ? store.entities()[id] : null;
+      return id ? (store.entities()[id] ?? null) : null;
     },
 
-    isbusy: () =>
-      store.workflow().accepting || store.workflow().terminating || store.workflow().creating,
+    isBusy: () => {
+      const w = store.workflow();
+      return w.accepting || w.terminating || w.creating || w.fetching;
+    },
   })),
+
   withMethods((store) => {
     const api = inject(LeasesApi);
+
+    function setWorkflow<K extends keyof LeasesState['workflow']>(key: K, value: boolean) {
+      patchState(store, (state) => ({
+        workflow: {
+          ...state.workflow,
+          [key]: value,
+        },
+      }));
+    }
+
+    function upsertLease(lease: LeaseDetails) {
+      patchState(store, (state) => ({
+        entities: {
+          ...state.entities,
+          [lease.lease.id]: lease,
+        },
+        currentLeaseId: lease.lease.id,
+      }));
+    }
 
     return {
       loadLeaseById: rxMethod<string>(
         switchMap((leaseId) => {
           patchState(store, {
-            status: 'loading',
+            status: LOADING,
             error: null,
-            workflow: { ...store.workflow(), fetching: true },
           });
+          setWorkflow('fetching', true);
 
           return api
             .getLeaseById(leaseId)
             .then(
               (lease) => {
-                patchState(store, (state) => ({
-                  entities: { ...state.entities, [lease.lease.id]: lease },
-                  currentLeaseId: lease.lease.id,
-                  status: 'success' as const,
-                }));
+                upsertLease(lease);
+                patchState(store, { status: SUCCESS });
               },
-              (error) => {
+              (err) => {
                 patchState(store, {
-                  status: 'error',
-                  error: error?.message || 'Failed to load lease',
-                  workflow: { ...store.workflow(), fetching: false },
+                  status: ERROR,
+                  error: err?.message || 'Failed to load lease',
                 });
               },
             )
             .finally(() => {
-              patchState(store, {
-                status: 'idle',
-                workflow: { ...store.workflow(), fetching: false },
-              });
+              setWorkflow('fetching', false);
+              patchState(store, { status: IDLE });
             });
         }),
       ),
@@ -84,31 +110,28 @@ export const LeasesStore = signalStore(
       acceptAsTenant: rxMethod<string>(
         switchMap((leaseId) => {
           patchState(store, {
-            status: 'loading',
+            status: LOADING,
             error: null,
-            workflow: { ...store.workflow(), accepting: true },
           });
+          setWorkflow('accepting', true);
+
           return api
             .acceptAsTenant(leaseId)
             .then(
               (lease) => {
-                patchState(store, (state) => ({
-                  entities: { ...state.entities, [lease.lease.id]: lease },
-                }));
+                upsertLease(lease);
+                patchState(store, { status: SUCCESS });
               },
-              (error) => {
+              (err) => {
                 patchState(store, {
-                  status: 'error',
-                  error: error?.message || 'Failed to accept lease',
-                  workflow: { ...store.workflow(), accepting: false },
+                  status: ERROR,
+                  error: err?.message || 'Failed to accept lease',
                 });
               },
             )
             .finally(() => {
-              patchState(store, {
-                status: 'idle',
-                workflow: { ...store.workflow(), accepting: false },
-              });
+              setWorkflow('accepting', false);
+              patchState(store, { status: IDLE });
             });
         }),
       ),
@@ -116,93 +139,86 @@ export const LeasesStore = signalStore(
       acceptAsLandlord: rxMethod<string>(
         switchMap((leaseId) => {
           patchState(store, {
-            status: 'loading',
+            status: LOADING,
             error: null,
-            workflow: { ...store.workflow(), accepting: true },
           });
+          setWorkflow('accepting', true);
 
           return api
             .acceptAsLandlord(leaseId)
             .then(
               (lease) => {
-                patchState(store, (state) => ({
-                  entities: { ...state.entities, [lease.lease.id]: lease },
-                }));
+                upsertLease(lease);
+                patchState(store, { status: SUCCESS });
               },
-              (error) => {
+              (err) => {
                 patchState(store, {
-                  status: 'error',
-                  error: error?.message || 'Failed to accept lease',
+                  status: ERROR,
+                  error: err?.message || 'Failed to accept lease',
                 });
               },
             )
             .finally(() => {
-              patchState(store, {
-                status: 'idle',
-                workflow: { ...store.workflow(), accepting: false },
-              });
+              setWorkflow('accepting', false);
+              patchState(store, { status: IDLE });
             });
         }),
       ),
 
       createLease: rxMethod<LeaseRequest>(
-        switchMap((leaseRequest) => {
+        switchMap((request) => {
           patchState(store, {
-            status: 'loading',
+            status: LOADING,
             error: null,
-            workflow: { ...store.workflow(), creating: true },
           });
+          setWorkflow('creating', true);
 
           return api
-            .createLease(leaseRequest)
+            .createLease(request)
             .then(
               (lease) => {
-                patchState(store, (state) => ({
-                  entities: { ...state.entities, [lease.lease.id]: lease },
-                  currentLeaseId: lease.lease.id,
-                  workflow: { ...state.workflow, creating: false },
-                }));
+                upsertLease(lease);
+                patchState(store, { status: SUCCESS });
               },
-              (error) => {
+              (err) => {
                 patchState(store, {
-                  status: 'error',
-                  error: error?.message || 'Failed to create lease',
-                  workflow: { ...store.workflow(), creating: false },
+                  status: ERROR,
+                  error: err?.message || 'Failed to create lease',
                 });
               },
             )
             .finally(() => {
-              patchState(store, {
-                status: 'idle',
-                workflow: { ...store.workflow(), creating: false },
-              });
+              setWorkflow('creating', false);
+              patchState(store, { status: IDLE });
             });
         }),
       ),
 
       terminateLease: rxMethod<string>(
         switchMap((leaseId) => {
-          patchState(store, { workflow: { ...store.workflow(), terminating: true } });
+          patchState(store, {
+            status: LOADING,
+            error: null,
+          });
+          setWorkflow('terminating', true);
+
           return api
             .terminateLease(leaseId)
             .then(
               (lease) => {
-                patchState(store, (state) => ({
-                  entities: { ...state.entities, [lease.lease.id]: lease },
-                }));
+                upsertLease(lease);
+                patchState(store, { status: SUCCESS });
               },
-              (error) => {
+              (err) => {
                 patchState(store, {
-                  status: 'error',
-                  error: error?.message || 'Failed to terminate lease',
-                  workflow: { ...store.workflow(), terminating: false },
+                  status: ERROR,
+                  error: err?.message || 'Failed to terminate lease',
                 });
               },
             )
             .finally(() => {
-              patchState(store, {
-                workflow: { ...store.workflow(), terminating: false },
-              });
+              setWorkflow('terminating', false);
+              patchState(store, { status: IDLE });
             });
         }),
       ),
