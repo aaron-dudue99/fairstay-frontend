@@ -97,10 +97,10 @@ export const AuthStore = signalStore(
                   error: err?.error?.message || err?.message || 'Login failed',
                 });
                 return of(null);
-              })
-            )
-          )
-        )
+              }),
+            ),
+          ),
+        ),
       ),
 
       restoreSession: rxMethod<void>(
@@ -120,10 +120,10 @@ export const AuthStore = signalStore(
               catchError(() => {
                 clearAuth();
                 return of(null);
-              })
-            )
-          )
-        )
+              }),
+            ),
+          ),
+        ),
       ),
 
       refreshToken: rxMethod<void>(
@@ -145,10 +145,10 @@ export const AuthStore = signalStore(
                 clearAuth();
                 authService.clearSession();
                 return of(null);
-              })
-            )
-          )
-        )
+              }),
+            ),
+          ),
+        ),
       ),
 
       logout: rxMethod<void>(
@@ -165,11 +165,11 @@ export const AuthStore = signalStore(
               catchError(() => {
                 clearAuth();
                 return of(null);
-              })
-            )
-          )
-        )
+              }),
+            ),
+          ),
+        ),
       ),
     };
-  })
+  }),
 );
