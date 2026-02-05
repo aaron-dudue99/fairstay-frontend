@@ -1,83 +1,75 @@
+import { inject } from '@angular/core';
 import {
-  HttpErrorResponse,
+  HttpEvent,
   HttpHandlerFn,
   HttpInterceptorFn,
   HttpRequest,
+  HttpErrorResponse,
 } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { AuthService } from './auth-service';
-import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
-import { authState } from './auth.state';
-import { Router } from '@angular/router';
+import { Observable, throwError, switchMap, catchError, tap } from 'rxjs';
 
-let isRefreshing = false;
-const refreshTokenSubject = new BehaviorSubject<string | null>(null);
+import { AuthStore } from './auth.store';
+import { AuthService } from './auth-service';
+import { LoginResponse } from './auth.models';
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
-) => {
-  const token = authState.token();
+): Observable<HttpEvent<unknown>> => {
+  const authStore = inject(AuthStore);
+  const authService = inject(AuthService);
+
   let authReq = req;
 
-  if (token && !req.url.includes('auth/refresh') && !req.url.includes('auth/login')) {
-    authReq = addToken(req, token);
+  const token = authStore.accessToken();
+
+  if (token) {
+    authReq = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    });
   }
 
   return next(authReq).pipe(
-    catchError((error) => {
-      if (
-        error instanceof HttpErrorResponse &&
-        error.status === 401 &&
-        !req.url.includes('auth/login') &&
-        !req.url.includes('auth/refresh')
-      ) {
-        return handle401Error(authReq, next);
+    catchError((error: HttpErrorResponse) => {
+      if (error.status !== 401) {
+        return throwError(() => error);
       }
 
-      return throwError(() => error);
+      // Skip refresh for auth endpoints to avoid infinite loop
+      if (req.url.includes('/auth/')) {
+        return throwError(() => error);
+      }
+
+      return authService.refreshToken().pipe(
+        tap((res) => {
+          const data = res.data as LoginResponse;
+          authStore.setAccessToken(data.accessToken);
+
+          if (data.user) {
+            authStore.setUser(data.user);
+          }
+        }),
+        switchMap((res) => {
+          const accessToken = res.data.accessToken;
+
+          const retryReq = req.clone({
+            setHeaders: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            withCredentials: true,
+          });
+
+          return next(retryReq);
+        }),
+        catchError(() => {
+          authStore.clearAuth();
+          authService.clearSession();
+          return throwError(() => error);
+        })
+      );
     })
   );
-};
-
-const handle401Error = (request: HttpRequest<unknown>, next: HttpHandlerFn) => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-
-  if (!isRefreshing) {
-    isRefreshing = true;
-    refreshTokenSubject.next(null);
-
-    return authService.refreshToken().pipe(
-      switchMap((response) => {
-        isRefreshing = false;
-        authState.setToken(response.data.accessToken);
-        authState.setUser(response.data.user);
-        refreshTokenSubject.next(response.data.accessToken);
-        return next(addToken(request, response.data.accessToken));
-      }),
-      catchError((error) => {
-        isRefreshing = false;
-        authState.clear();
-        router.navigate(['/login']);
-        return throwError(() => error);
-      })
-    );
-  } else {
-    return refreshTokenSubject.pipe(
-      filter((token) => token != null),
-      take(1),
-      switchMap((jwt) => {
-        return next(addToken(request, jwt!));
-      })
-    );
-  }
-};
-
-const addToken = (request: HttpRequest<unknown>, token: string) => {
-  return request.clone({
-    setHeaders: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
 };

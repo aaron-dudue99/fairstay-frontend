@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -10,11 +10,11 @@ import { Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { passwordMatchValidator } from '../../../../utils/password-match.validator';
 import { take } from 'rxjs/internal/operators/take';
-import { authState } from '../../data-access/auth.state';
 import { RegisterUserForm } from '../../data-access/auth.models';
+import { AuthStore } from '../../data-access/auth.store';
+
 @Component({
   selector: 'app-signup',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -28,14 +28,15 @@ import { RegisterUserForm } from '../../data-access/auth.models';
   styleUrl: './signup.css',
 })
 export class Signup {
-  private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private messageService = inject(MessageService);
+  readonly #fb = inject(FormBuilder);
+  readonly #authService = inject(AuthService);
+  readonly #authStore = inject(AuthStore);
+  readonly #router = inject(Router);
+  readonly #messageService = inject(MessageService);
 
   loading = signal(false);
 
-  signupForm = this.fb.nonNullable.group(
+  signupForm = this.#fb.nonNullable.group(
     {
       fullName: ['', Validators.required],
       phoneNumber: ['', Validators.required],
@@ -52,6 +53,29 @@ export class Signup {
     { label: 'Landlord', value: 'LANDLORD' },
   ];
 
+  #signupInProgress = signal(false);
+
+  constructor() {
+    effect(() => {
+      const status = this.#authStore.status();
+      const user = this.#authStore.user();
+
+      if (!this.#signupInProgress()) return;
+
+      if (status === 'authenticated' && user) {
+        this.#messageService.add({
+          severity: 'success',
+          summary: 'Account created',
+          detail: 'Welcome to Fairstay 🎉',
+          life: 2500,
+        });
+
+        this.#router.navigate(['']);
+        this.#signupInProgress.set(false);
+      }
+    });
+  }
+
   onSignUp() {
     if (this.loading()) return;
 
@@ -64,32 +88,18 @@ export class Signup {
 
     const { confirmPassword, ...signupPayload } = this.signupForm.getRawValue();
 
-    this.authService
+    this.#authService
       .signUp(signupPayload as RegisterUserForm)
       .pipe(take(1))
       .subscribe({
         next: () => this.autoLogin(signupPayload.email!, signupPayload.password!),
+        error: () => this.loading.set(false),
         complete: () => this.loading.set(false),
       });
   }
 
   private autoLogin(email: string, password: string) {
-    this.authService
-      .login(email, password)
-      .pipe(take(1))
-      .subscribe({
-        next: (res) => {
-          authState.setUser(res.data.user);
-
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Account created',
-            detail: 'Welcome to Fairstay 🎉',
-            life: 2500,
-          });
-
-          this.router.navigate(['']);
-        },
-      });
+    this.#signupInProgress.set(true);
+    this.#authStore.login({ email, password });
   }
 }

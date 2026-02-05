@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthStore } from '../../auth/data-access/auth.store';
 import { AuthService } from '../../auth/data-access/auth-service';
 
 @Component({
@@ -8,8 +9,9 @@ import { AuthService } from '../../auth/data-access/auth-service';
   templateUrl: './sidebar.html',
 })
 export class Sidebar {
-  readonly authService = inject(AuthService);
-  readonly router = inject(Router);
+  readonly #authStore = inject(AuthStore);
+  readonly #authService = inject(AuthService);
+  readonly #router = inject(Router);
 
   navItems = [
     {
@@ -40,10 +42,7 @@ export class Sidebar {
   ];
 
   onLogout() {
-    this.authService
-      .logout()
-      .subscribe(() => {
-        this.router.navigate(['/login']);
-      });
+    this.#authStore.logout();
+    this.#router.navigate(['/login']);
   }
 }

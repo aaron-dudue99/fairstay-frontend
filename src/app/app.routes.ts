@@ -43,7 +43,7 @@ export const routes: Routes = [
       },
       {
         path: 'leases',
-        loadComponent: () => import('./libs/leases/leases').then((m) => m.Leases),
+        loadComponent: () => import('./libs/leases/feature-shell/leases').then((m) => m.Leases),
       },
       {
         path: 'payments',

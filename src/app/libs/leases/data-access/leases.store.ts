@@ -4,6 +4,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { LeasesApi } from './leases.api';
 import { LeaseDetails, LeaseRequest } from './leases.models';
+import { withDevtools } from '@angular-architects/ngrx-toolkit';
 
 export type LeaseStatusState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -29,7 +30,7 @@ const ERROR = 'error' as const;
 
 export const LeasesStore = signalStore(
   { providedIn: 'root' },
-
+  withDevtools('leases'),
   withState<LeasesState>({
     entities: {},
     currentLeaseId: null,

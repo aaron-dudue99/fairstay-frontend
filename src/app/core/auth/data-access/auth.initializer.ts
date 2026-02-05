@@ -1,32 +1,37 @@
 import { inject } from '@angular/core';
 import { AuthService } from './auth-service';
-import { authState } from './auth.state';
+import { AuthStore } from './auth.store';
 import { catchError, of, switchMap, tap } from 'rxjs';
+import { LoginResponse, User } from './auth.models';
 
 export const authInitializer = () => {
   const authService = inject(AuthService);
+  const authStore = inject(AuthStore);
 
   if (!authService.isSessionActive()) {
-    authState.markInitialized();
+    authStore.markInitialized();
     return of(null);
   }
 
   return authService.refreshToken().pipe(
     switchMap((res) => {
       if (res?.success) {
-        authState.setToken(res.data.accessToken);
+        const data = res.data as LoginResponse;
+        authStore.setAccessToken(data.accessToken);
 
-        if (res.data.user) {
-          authState.setUser(res.data.user);
+        if (data.user) {
+          authStore.setUser(data.user);
           return of(res);
         } else {
           return authService.restoreSession().pipe(
             tap((userRes) => {
               if (userRes.success) {
-                authState.setUser(userRes.data);
+                const user = userRes.data as User;
+                authStore.setUser(user);
               }
             }),
-            catchError((userErr) => {
+            catchError(() => {
+              authStore.clearAuth();
               authService.clearSession();
               return of(null);
             })
@@ -36,10 +41,11 @@ export const authInitializer = () => {
         return of(null);
       }
     }),
-    tap(() => authState.markInitialized()),
-    catchError((err) => {
+    tap(() => authStore.markInitialized()),
+    catchError(() => {
+      authStore.clearAuth();
       authService.clearSession();
-      authState.markInitialized();
+      authStore.markInitialized();
       return of(null);
     })
   );
