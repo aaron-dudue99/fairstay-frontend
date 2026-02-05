@@ -223,6 +223,10 @@ export const LeasesStore = signalStore(
             });
         }),
       ),
+
+      resetCurrentLease: () => {
+        patchState(store, { currentLeaseId: null });
+      },
     };
   }),
 );

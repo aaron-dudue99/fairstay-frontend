@@ -31,4 +31,8 @@ export class LeasesFacade {
   terminateLease(leaseId: string) {
     this.#leasesStore.terminateLease(leaseId);
   }
+
+  clearSelectedLease() {
+    this.#leasesStore.resetCurrentLease();
+  }
 }
