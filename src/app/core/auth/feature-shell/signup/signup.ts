@@ -11,7 +11,7 @@ import { MessageService } from 'primeng/api';
 import { passwordMatchValidator } from '../../../../utils/password-match.validator';
 import { take } from 'rxjs/internal/operators/take';
 import { RegisterUserForm } from '../../data-access/auth.models';
-import { AuthStore } from '../../data-access/auth.store';
+import { AuthFacade } from '../../data-access/auth.facade';
 
 @Component({
   selector: 'app-signup',
@@ -30,7 +30,7 @@ import { AuthStore } from '../../data-access/auth.store';
 export class Signup {
   readonly #fb = inject(FormBuilder);
   readonly #authService = inject(AuthService);
-  readonly #authStore = inject(AuthStore);
+  readonly #authFacade = inject(AuthFacade);
   readonly #router = inject(Router);
   readonly #messageService = inject(MessageService);
 
@@ -57,8 +57,8 @@ export class Signup {
 
   constructor() {
     effect(() => {
-      const status = this.#authStore.status();
-      const user = this.#authStore.user();
+      const status = this.#authFacade.status();
+      const user = this.#authFacade.user();
 
       if (!this.#signupInProgress()) return;
 
@@ -100,6 +100,6 @@ export class Signup {
 
   private autoLogin(email: string, password: string) {
     this.#signupInProgress.set(true);
-    this.#authStore.login({ email, password });
+    this.#authFacade.login({ email, password });
   }
 }

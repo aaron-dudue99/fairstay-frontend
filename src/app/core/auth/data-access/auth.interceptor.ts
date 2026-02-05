@@ -8,7 +8,7 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError, switchMap, catchError, tap } from 'rxjs';
 
-import { AuthStore } from './auth.store';
+import { AuthFacade } from './auth.facade';
 import { AuthService } from './auth-service';
 import { LoginResponse } from './auth.models';
 
@@ -16,12 +16,12 @@ export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-  const authStore = inject(AuthStore);
+  const authFacade = inject(AuthFacade);
   const authService = inject(AuthService);
 
   let authReq = req;
 
-  const token = authStore.accessToken();
+  const token = authFacade.accessToken();
 
   if (token) {
     authReq = req.clone({
@@ -46,10 +46,10 @@ export const authInterceptor: HttpInterceptorFn = (
       return authService.refreshToken().pipe(
         tap((res) => {
           const data = res.data as LoginResponse;
-          authStore.setAccessToken(data.accessToken);
+          authFacade.setAccessToken(data.accessToken);
 
           if (data.user) {
-            authStore.setUser(data.user);
+            authFacade.setUser(data.user);
           }
         }),
         switchMap((res) => {
@@ -65,7 +65,7 @@ export const authInterceptor: HttpInterceptorFn = (
           return next(retryReq);
         }),
         catchError(() => {
-          authStore.clearAuth();
+          authFacade.clearAuth();
           authService.clearSession();
           return throwError(() => error);
         })

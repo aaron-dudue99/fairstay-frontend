@@ -1,15 +1,15 @@
 import { inject } from '@angular/core';
 import { AuthService } from './auth-service';
-import { AuthStore } from './auth.store';
+import { AuthFacade } from './auth.facade';
 import { catchError, of, switchMap, tap } from 'rxjs';
 import { LoginResponse, User } from './auth.models';
 
 export const authInitializer = () => {
   const authService = inject(AuthService);
-  const authStore = inject(AuthStore);
+  const authFacade = inject(AuthFacade);
 
   if (!authService.isSessionActive()) {
-    authStore.markInitialized();
+    authFacade.markInitialized();
     return of(null);
   }
 
@@ -17,21 +17,21 @@ export const authInitializer = () => {
     switchMap((res) => {
       if (res?.success) {
         const data = res.data as LoginResponse;
-        authStore.setAccessToken(data.accessToken);
+        authFacade.setAccessToken(data.accessToken);
 
         if (data.user) {
-          authStore.setUser(data.user);
+          authFacade.setUser(data.user);
           return of(res);
         } else {
           return authService.restoreSession().pipe(
             tap((userRes) => {
               if (userRes.success) {
                 const user = userRes.data as User;
-                authStore.setUser(user);
+                authFacade.setUser(user);
               }
             }),
             catchError(() => {
-              authStore.clearAuth();
+              authFacade.clearAuth();
               authService.clearSession();
               return of(null);
             })
@@ -41,11 +41,11 @@ export const authInitializer = () => {
         return of(null);
       }
     }),
-    tap(() => authStore.markInitialized()),
+    tap(() => authFacade.markInitialized()),
     catchError(() => {
-      authStore.clearAuth();
+      authFacade.clearAuth();
       authService.clearSession();
-      authStore.markInitialized();
+      authFacade.markInitialized();
       return of(null);
     })
   );

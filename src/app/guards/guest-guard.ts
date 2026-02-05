@@ -1,16 +1,16 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthStore } from '../core/auth/data-access/auth.store';
+import { AuthFacade } from '../core/auth/data-access/auth.facade';
 
 export const guestGuard: CanActivateFn = () => {
   const router = inject(Router);
-  const authStore = inject(AuthStore);
+  const authFacade = inject(AuthFacade);
 
-  if (!authStore.initialized()) {
+  if (!authFacade.initialized()) {
     return false;
   }
 
-  if (authStore.isAuthenticated()) {
+  if (authFacade.isAuthenticated()) {
     return router.createUrlTree(['/']);
   }
 

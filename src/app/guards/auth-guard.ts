@@ -1,14 +1,14 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthStore } from '../core/auth/data-access/auth.store';
+import { AuthFacade } from '../core/auth/data-access/auth.facade';
 
 export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
-  const authStore = inject(AuthStore);
+  const authFacade = inject(AuthFacade);
 
-  if (!authStore.initialized()) {
+  if (!authFacade.initialized()) {
     return false;
   }
 
-  return authStore.isAuthenticated() ? true : router.createUrlTree(['/login']);
+  return authFacade.isAuthenticated() ? true : router.createUrlTree(['/login']);
 };

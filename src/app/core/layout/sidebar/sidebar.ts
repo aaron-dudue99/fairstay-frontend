@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthStore } from '../../auth/data-access/auth.store';
-import { AuthService } from '../../auth/data-access/auth-service';
+import { AuthFacade } from '../../auth/data-access/auth.facade';
 
 @Component({
   selector: 'app-sidebar',
@@ -9,8 +8,7 @@ import { AuthService } from '../../auth/data-access/auth-service';
   templateUrl: './sidebar.html',
 })
 export class Sidebar {
-  readonly #authStore = inject(AuthStore);
-  readonly #authService = inject(AuthService);
+  readonly #authFacade = inject(AuthFacade);
   readonly #router = inject(Router);
 
   navItems = [
@@ -42,7 +40,7 @@ export class Sidebar {
   ];
 
   onLogout() {
-    this.#authStore.logout();
+    this.#authFacade.logout();
     this.#router.navigate(['/login']);
   }
 }

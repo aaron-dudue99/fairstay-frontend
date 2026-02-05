@@ -3,7 +3,7 @@ import { MenuItem } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
-import { AuthStore } from '../../auth/data-access/auth.store';
+import { AuthFacade } from '../../auth/data-access/auth.facade';
 import { AuthService } from '../../auth/data-access/auth-service';
 import { Router } from '@angular/router';
 
@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
   templateUrl: './topbar.html',
 })
 export class Topbar {
-  readonly #authStore = inject(AuthStore);
+  readonly #authFacade = inject(AuthFacade);
   readonly #authService = inject(AuthService);
   readonly #router = inject(Router);
 
@@ -46,7 +46,7 @@ export class Topbar {
   }
 
   onLogout() {
-    this.#authStore.logout();
+    this.#authFacade.logout();
     this.#router.navigate(['/login']);
   }
 }

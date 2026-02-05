@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
-import { AuthStore } from '../../data-access/auth.store';
+import { AuthFacade } from '../../data-access/auth.facade';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +26,7 @@ import { AuthStore } from '../../data-access/auth.store';
 })
 export class Login {
   readonly #fb = inject(FormBuilder);
-  readonly #authStore = inject(AuthStore);
+  readonly #authFacade = inject(AuthFacade);
   readonly #router = inject(Router);
   readonly #messageService = inject(MessageService);
 
@@ -40,9 +40,9 @@ export class Login {
 
   constructor() {
     effect(() => {
-      const status = this.#authStore.status();
-      const user = this.#authStore.user();
-      const error = this.#authStore.error();
+      const status = this.#authFacade.status();
+      const user = this.#authFacade.user();
+      const error = this.#authFacade.error();
 
       if (status === 'loading') {
         this.loading.set(true);
@@ -82,6 +82,6 @@ export class Login {
     }
 
     const { email, password } = this.loginForm.value;
-    this.#authStore.login({ email: email!, password: password! });
+    this.#authFacade.login({ email: email!, password: password! });
   }
 }
