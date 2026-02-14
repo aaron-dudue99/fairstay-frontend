@@ -40,7 +40,7 @@ export class ViewUnit {
   getLeaseSeverity(status: string) {
       switch (status) {
           case 'ACTIVE': return 'success';
-          case 'PENDING': return 'warning';
+          case 'PENDING': return 'warn';
           case 'TERMINATED': return 'danger';
           default: return 'info';
       }
