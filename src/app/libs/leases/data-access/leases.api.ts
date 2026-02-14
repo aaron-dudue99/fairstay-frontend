@@ -40,4 +40,8 @@ export class LeasesApi {
   terminateLease(leaseId: string): Promise<LeaseDetails> {
     return this.unwrap(this.http.post(`${this.basePath}/${leaseId}/terminate`, {}));
   }
+
+  getAllLeases(): Promise<LeaseDetails[]> {
+    return this.unwrap(this.http.get(this.basePath));
+  }
 }

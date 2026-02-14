@@ -16,6 +16,10 @@ export class LeasesFacade {
     this.#leasesStore.loadLeaseById(leaseId);
   }
 
+  loadAllLeases() {
+    this.#leasesStore.loadAllLeases();
+  }
+
   acceptAsTenant(leaseId: string) {
     this.#leasesStore.acceptAsTenant(leaseId);
   }

@@ -108,6 +108,41 @@ export const LeasesStore = signalStore(
         }),
       ),
 
+      loadAllLeases: rxMethod<void>(
+        switchMap(() => {
+          patchState(store, {
+            status: LOADING,
+            error: null,
+          });
+          setWorkflow('fetching', true);
+
+          return api
+            .getAllLeases()
+            .then(
+              (leases) => {
+                const entities = leases.reduce(
+                  (acc, curr) => ({ ...acc, [curr.lease.id]: curr }),
+                  {},
+                );
+                patchState(store, (state) => ({
+                  entities: { ...state.entities, ...entities },
+                  status: SUCCESS,
+                }));
+              },
+              (err) => {
+                patchState(store, {
+                  status: ERROR,
+                  error: err?.message || 'Failed to load all leases',
+                });
+              },
+            )
+            .finally(() => {
+              setWorkflow('fetching', false);
+              patchState(store, { status: IDLE });
+            });
+        }),
+      ),
+
       acceptAsTenant: rxMethod<string>(
         switchMap((leaseId) => {
           patchState(store, {

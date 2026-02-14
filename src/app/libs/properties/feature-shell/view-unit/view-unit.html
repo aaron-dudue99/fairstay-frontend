@@ -1,0 +1,48 @@
+<div class="flex flex-col gap-6 p-6 text-white">
+  <!-- Header -->
+  <div class="flex justify-between items-start border-b border-white/10 pb-4">
+    <div class="flex flex-col gap-1">
+      <h2 class="text-2xl font-bold">{{ unit.unitLabel }}</h2>
+      <span class="text-gray-400 text-sm">Unit Details</span>
+    </div>
+    <p-tag [value]="unit.status" [severity]="getSeverity(unit.status)"></p-tag>
+  </div>
+
+  <!-- Lease Information -->
+  <div class="flex flex-col gap-4">
+    <h3 class="text-lg font-bold text-primary flex items-center gap-2">
+      <i class="pi pi-file"></i> Lease Information
+    </h3>
+    
+    @if (activeLease(); as leaseDetails) {
+        <div class="glass p-4 rounded-xl border border-white/5 flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-400 text-sm">Status</span>
+                <p-tag [value]="leaseDetails.lease.status" [severity]="getLeaseSeverity(leaseDetails.lease.status)"></p-tag>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-400 text-sm">Tenant</span>
+                 <!-- In a real app we'd fetch tenant name, for now showing ID or placeholder if we had it -->
+                <span class="font-bold">{{ leaseDetails.lease.tenantId.substring(0, 8) }}...</span>
+            </div>
+             <div class="flex justify-between items-center">
+                <span class="text-gray-400 text-sm">Monthly Rent</span>
+                <span class="font-bold text-green-400">{{ leaseDetails.lease.monthlyRent | currency: leaseDetails.lease.currency }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-400 text-sm">Start Date</span>
+                <span class="font-bold">{{ leaseDetails.lease.startDate | date }}</span>
+            </div>
+             <div class="flex justify-between items-center">
+                <span class="text-gray-400 text-sm">End Date</span>
+                <span class="font-bold">{{ leaseDetails.lease.endDate ? (leaseDetails.lease.endDate | date) : 'Open-ended' }}</span>
+            </div>
+        </div>
+    } @else {
+        <div class="p-6 rounded-xl border border-dashed border-white/10 flex flex-col items-center justify-center text-center gap-2">
+            <i class="pi pi-folder-open text-2xl text-gray-500"></i>
+            <p class="text-gray-400">No active lease found for this unit.</p>
+        </div>
+    }
+  </div>
+</div>

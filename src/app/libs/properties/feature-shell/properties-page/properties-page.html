@@ -1,0 +1,176 @@
+<div class="flex flex-col gap-8 max-w-7xl mx-auto pb-8 p-6">
+  <!-- Summary Metrics Bar -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="glass p-4 rounded-2xl flex flex-col items-center justify-center">
+          <span class="text-gray-400 text-xs uppercase font-bold tracking-wider">Properties</span>
+          <span class="text-2xl font-bold text-white">{{ totalProperties() }}</span>
+      </div>
+      <div class="glass p-4 rounded-2xl flex flex-col items-center justify-center">
+          <span class="text-gray-400 text-xs uppercase font-bold tracking-wider">Total Units</span>
+          <span class="text-2xl font-bold text-white">{{ totalUnits() }}</span>
+      </div>
+      <div class="glass p-4 rounded-2xl flex flex-col items-center justify-center">
+          <span class="text-green-400 text-xs uppercase font-bold tracking-wider">Occupied</span>
+          <span class="text-2xl font-bold text-white">{{ totalOccupied() }}</span>
+      </div>
+      <div class="glass p-4 rounded-2xl flex flex-col items-center justify-center">
+          <span class="text-gray-400 text-xs uppercase font-bold tracking-wider">Vacant</span>
+          <span class="text-2xl font-bold text-white">{{ totalVacant() }}</span>
+      </div>
+       <div class="glass p-4 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
+          <div class="absolute inset-0 bg-primary/10"></div>
+          <span class="text-primary text-xs uppercase font-bold tracking-wider relative z-10">Occupancy</span>
+          <span class="text-2xl font-bold text-white relative z-10">{{ occupancyRate() }}%</span>
+      </div>
+  </div>
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-white mb-2">My Properties</h1>
+      <p class="text-gray-400">Manage your portfolio and unit occupancy.</p>
+    </div>
+    <button
+        (click)="showCreateProperty.set(true)"
+        class="px-5 py-2.5 rounded-xl bg-primary text-primary-contrast font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2">
+        <i class="pi pi-plus"></i>
+        <span>Add Property</span>
+    </button>
+  </div>
+
+  <!-- Properties List -->
+  <div class="flex flex-col gap-6">
+      @for (property of properties(); track property.id) {
+          <div class="glass rounded-3xl p-6 border border-white/5 hover:border-white/10 transition-colors">
+              <!-- Property Header -->
+              <div class="flex justify-between items-start mb-6">
+                  <div class="flex gap-4">
+                      <div class="w-16 h-16 rounded-2xl bg-surface-hover flex items-center justify-center">
+                          <i class="pi pi-building text-2xl text-gray-400"></i>
+                      </div>
+                      <div>
+                          <h2 class="text-xl font-bold text-white mb-1">{{ property.propertyName }}</h2>
+                          <p class="text-gray-400 text-sm flex items-center gap-2">
+                              <i class="pi pi-map-marker text-xs"></i>
+                              {{ property.address }}
+                          </p>
+                      </div>
+                  </div>
+                  <div class="text-right">
+                       <!-- Placeholder for mini chart or simple status -->
+                  </div>
+              </div>
+              
+              <!-- Units Section -->
+              <div class="bg-black/20 rounded-2xl p-4">
+                  <div class="flex items-center justify-between mb-4">
+                      <h3 class="text-white font-bold text-sm">Units</h3>
+                      <button 
+                          (click)="toggleUnits(property.id)"
+                          class="text-primary text-xs font-bold hover:underline">
+                          {{ getPropertyUnits(property.id).length ? 'Refresh Units' : 'Load Units' }}
+                      </button>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      @for (unit of getPropertyUnits(property.id); track unit.id) {
+                          <div class="p-3 rounded-xl bg-surface-card border border-white/5 flex items-center justify-between group hover:border-primary/30 transition-colors">
+                              <div class="flex items-center gap-3">
+                                  <div [class]="'w-2 h-2 rounded-full ' + (unit.status === 'OCCUPIED' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-500')"></div>
+                                  <span class="text-white font-bold text-sm">{{ unit.unitLabel }}</span>
+                              </div>
+                              
+                              <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                                  @if (unit.status === 'VACANT') {
+                                      <button 
+                                          (click)="createLease(unit)"
+                                          class="w-7 h-7 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 flex items-center justify-center" 
+                                          title="New Lease">
+                                          <i class="pi pi-plus text-xs font-bold"></i>
+                                      </button>
+                                  } 
+                                  
+                                  <!-- Always show view button -->
+                                  <button 
+                                      (click)="viewingUnit.set(unit)"
+                                      class="w-7 h-7 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 flex items-center justify-center"
+                                      title="View Unit">
+                                      <i class="pi pi-eye text-xs"></i>
+                                  </button>
+                              </div>
+                          </div>
+                      }
+                                            <!-- Add Unit Button -->
+                       <button
+                           (click)="creatingUnitForPropertyId.set(property.id)"
+                           class="p-3 rounded-xl border border-dashed border-white/10 flex items-center justify-center hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group w-full">
+                           <span class="text-gray-500 text-xs font-bold group-hover:text-primary transition-colors flex items-center gap-2">
+                               <i class="pi pi-plus"></i> Add Unit
+                           </span>
+                       </button>
+                  </div>
+              </div>
+          </div>
+      } @empty {
+          <div class="glass rounded-3xl p-12 flex flex-col items-center justify-center text-center">
+              <div class="w-16 h-16 rounded-full bg-surface-hover flex items-center justify-center mb-4">
+                  <i class="pi pi-home text-2xl text-gray-400"></i>
+              </div>
+              <h3 class="text-white font-bold text-lg mb-2">No Properties Found</h3>
+              <p class="text-gray-400 max-w-md mb-6">Get started by adding your first property to track units and leases.</p>
+              <button 
+                  (click)="showCreateProperty.set(true)"
+                  class="px-5 py-2.5 rounded-xl bg-primary text-primary-contrast font-bold">
+                  Add Property
+              </button>
+          </div>
+      }
+  </div>
+
+  <p-dialog 
+    header="Add New Property" 
+    [visible]="showCreateProperty()" 
+    (visibleChange)="showCreateProperty.set($event)"
+    [modal]="true" 
+    [style]="{ width: '30rem' }" 
+    [draggable]="false" 
+    [resizable]="false"
+    appendTo="body"
+    styleClass="glass rounded-3xl border-none">
+      <app-create-property (cancelled)="showCreateProperty.set(false)"></app-create-property>
+  </p-dialog>
+
+  <p-dialog 
+    header="Add New Unit" 
+    [visible]="!!creatingUnitForPropertyId()" 
+    (visibleChange)="!$event ? creatingUnitForPropertyId.set(null) : null"
+    [modal]="true" 
+    [style]="{ width: '30rem' }" 
+    [draggable]="false" 
+    [resizable]="false"
+    appendTo="body"
+    styleClass="glass rounded-3xl border-none">
+      @if (creatingUnitForPropertyId(); as propertyId) {
+        <app-create-unit 
+            [propertyId]="propertyId"
+            (cancelled)="creatingUnitForPropertyId.set(null)"
+            (created)="creatingUnitForPropertyId.set(null)">
+        </app-create-unit>
+      }
+  </p-dialog>
+
+  <p-dialog 
+    header="Unit Details" 
+    [visible]="!!viewingUnit()" 
+    (visibleChange)="!$event ? viewingUnit.set(null) : null"
+    [modal]="true" 
+    [style]="{ width: '30rem' }" 
+    [draggable]="false" 
+    [resizable]="false"
+    appendTo="body"
+    styleClass="glass rounded-3xl border-none">
+      @if (viewingUnit(); as unit) {
+        <app-view-unit [unit]="unit"></app-view-unit>
+      }
+  </p-dialog>
+</div>

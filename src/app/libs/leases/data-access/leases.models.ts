@@ -47,3 +47,5 @@ export interface LeaseRequest {
   leaseRequestDto: LeaseRequestDto;
   termsText: string;
 }
+
+export type currencyOptions = [{ label: 'USD'; value: 'USD' }, { label: 'ZWG'; value: 'ZWG' }];

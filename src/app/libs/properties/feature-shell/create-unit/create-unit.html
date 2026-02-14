@@ -1,0 +1,59 @@
+<div class="flex flex-col gap-6 p-6">
+  <div class="flex flex-col gap-2">
+    <h2 class="text-2xl font-bold text-white">Add New Unit</h2>
+    <p class="text-gray-400">Add a unit to this property.</p>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4">
+      <!-- Unit Label -->
+      <div class="flex flex-col gap-2">
+        <label for="unitLabel" class="text-sm font-bold text-gray-300">Unit Label</label>
+        <input
+          pInputText
+          id="unitLabel"
+          formControlName="unitLabel"
+          placeholder="e.g. Apt 101"
+          class="w-full !bg-surface-card !border-white/10 text-white placeholder:text-gray-600 focus:!border-primary transition-colors"
+        />
+        @if (form.get('unitLabel')?.invalid && form.get('unitLabel')?.touched) {
+          <small class="text-red-400">Unit label is required.</small>
+        }
+      </div>
+
+      <!-- Status -->
+      <div class="flex flex-col gap-2">
+        <label for="status" class="text-sm font-bold text-gray-300">Status</label>
+        <p-select
+          [options]="statusOptions"
+          formControlName="status"
+          placeholder="Select a status"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="w-full !bg-surface-card !border-white/10 text-white"
+        ></p-select>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-white/10">
+      <button
+        type="button"
+        (click)="cancelled.emit()"
+        class="px-6 py-2.5 rounded-xl font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        [disabled]="form.invalid || isBusy()"
+        class="px-6 py-2.5 rounded-xl bg-primary text-primary-contrast font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+      >
+        @if (isBusy()) {
+          <i class="pi pi-spin pi-spinner"></i>
+        }
+        <span>Add Unit</span>
+      </button>
+    </div>
+  </form>
+</div>
